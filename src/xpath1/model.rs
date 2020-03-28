@@ -183,6 +183,7 @@ macro_rules! path_fn {
         }
     };
 }
+
 macro_rules! predicate_fn {
     ($fn_name:ident, $expr_t:ident) => {
         pub fn $fn_name(left: Predicate, right: Predicate) -> Self {
@@ -529,6 +530,32 @@ impl Step {
     step_fn!(all_following_comments, Following, Comment);
     step_fn!(following_elements, Following, Named, named);
 
+    step_fn!(all_following_sibling, FollowingSibling, Node);
+    step_fn!(all_following_sibling_elements, FollowingSibling, All);
+    step_fn!(all_following_sibling_text, FollowingSibling, Text);
+    step_fn!(all_following_sibling_comments, FollowingSibling, Comment);
+    step_fn!(following_sibling_elements, FollowingSibling, Named, named);
+
+    // Namespace
+
+    step_fn!(all_parent, Parent, Node);
+    step_fn!(all_parent_elements, Parent, All);
+    step_fn!(all_parent_text, Parent, Text);
+    step_fn!(all_parent_comments, Parent, Comment);
+    step_fn!(parent_elements, Parent, Named, named);
+
+    step_fn!(all_preceding, Preceding, Node);
+    step_fn!(all_preceding_elements, Preceding, All);
+    step_fn!(all_preceding_text, Preceding, Text);
+    step_fn!(all_preceding_comments, Preceding, Comment);
+    step_fn!(preceding_elements, Preceding, Named, named);
+
+    step_fn!(all_preceding_sibling, PrecedingSibling, Node);
+    step_fn!(all_preceding_sibling_elements, PrecedingSibling, All);
+    step_fn!(all_preceding_sibling_text, PrecedingSibling, Text);
+    step_fn!(all_preceding_sibling_comments, PrecedingSibling, Comment);
+    step_fn!(preceding_sibling_elements, PrecedingSibling, Named, named);
+
     step_fn!(all_self, SelfNode, Node);
     step_fn!(all_self_elements, SelfNode, All);
     step_fn!(all_self_text, SelfNode, Text);
@@ -596,18 +623,75 @@ impl LocationPath {
         }
     }
 
+    path_fn!(all_ancestors);
+    path_fn!(all_ancestor_elements);
+    path_fn!(all_ancestor_text);
+    path_fn!(all_ancestor_comments);
+    path_fn!(ancestor_elements, named);
+
+    path_fn!(all_ancestors_or_self);
+    path_fn!(all_ancestor_or_self_elements);
+    path_fn!(all_ancestor_or_self_text);
+    path_fn!(all_ancestor_or_self_comments);
+    path_fn!(ancestor_or_self_elements, named);
+
+    path_fn!(all_attributes);
+    path_fn!(attributes, named);
+
     path_fn!(all_children);
     path_fn!(all_child_elements);
     path_fn!(all_child_text);
     path_fn!(all_child_comments);
     path_fn!(child_elements, named);
 
-    path_fn!(all_attributes);
-    path_fn!(attributes, named);
-
     path_fn!(all_descendants);
     path_fn!(all_descendant_elements);
+    path_fn!(all_descendant_text);
+    path_fn!(all_descendant_comments);
     path_fn!(descendant_elements, named);
+
+    path_fn!(all_descendants_or_self);
+    path_fn!(all_descendant_or_self_elements);
+    path_fn!(all_descendant_or_self_text);
+    path_fn!(all_descendant_or_self_comments);
+    path_fn!(descendant_or_self_elements, named);
+
+    path_fn!(all_following);
+    path_fn!(all_following_elements);
+    path_fn!(all_following_text);
+    path_fn!(all_following_comments);
+    path_fn!(following_elements, named);
+
+    path_fn!(all_following_sibling);
+    path_fn!(all_following_sibling_elements);
+    path_fn!(all_following_sibling_text);
+    path_fn!(all_following_sibling_comments);
+    path_fn!(following_sibling_elements, named);
+
+    // Namespace
+
+    path_fn!(all_parent);
+    path_fn!(all_parent_elements);
+    path_fn!(all_parent_text);
+    path_fn!(all_parent_comments);
+    path_fn!(parent_elements, named);
+
+    path_fn!(all_preceding);
+    path_fn!(all_preceding_elements);
+    path_fn!(all_preceding_text);
+    path_fn!(all_preceding_comments);
+    path_fn!(preceding_elements, named);
+
+    path_fn!(all_preceding_sibling);
+    path_fn!(all_preceding_sibling_elements);
+    path_fn!(all_preceding_sibling_text);
+    path_fn!(all_preceding_sibling_comments);
+    path_fn!(preceding_sibling_elements, named);
+
+    path_fn!(all_self);
+    path_fn!(all_self_elements);
+    path_fn!(all_self_text);
+    path_fn!(all_self_comments);
 
     pub fn append(&mut self, step: Step) -> &mut Self {
         self.steps.push(step);
