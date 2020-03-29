@@ -16,31 +16,37 @@ macro_rules! select {
 #[test]
 fn test_spec_location_path_examples_01() {
     assert_eq!(Step::child_elements("para").to_string(), "child::para");
+    assert_eq!(Step::child_elements("para").to_abbr_string(), "para");
 }
 
 #[test]
 fn test_spec_location_path_examples_02() {
     assert_eq!(Step::all_child_elements().to_string(), "child::*");
+    assert_eq!(Step::all_child_elements().to_abbr_string(), "*");
 }
 
 #[test]
 fn test_spec_location_path_examples_03() {
     assert_eq!(Step::all_child_text().to_string(), "child::text()");
+    assert_eq!(Step::all_child_text().to_abbr_string(), "text()");
 }
 
 #[test]
 fn test_spec_location_path_examples_04() {
     assert_eq!(Step::all_children().to_string(), "child::node()");
+    assert_eq!(Step::all_children().to_abbr_string(), "node()");
 }
 
 #[test]
 fn test_spec_location_path_examples_05() {
     assert_eq!(Step::attributes("name").to_string(), "attribute::name");
+    assert_eq!(Step::attributes("name").to_abbr_string(), "@name");
 }
 
 #[test]
 fn test_spec_location_path_examples_06() {
     assert_eq!(Step::all_attributes().to_string(), "attribute::*");
+    assert_eq!(Step::all_attributes().to_abbr_string(), "@*");
 }
 
 #[test]
@@ -85,6 +91,7 @@ fn test_spec_location_path_examples_12() {
     let mut path = LocationPath::new();
     path.child_elements("chapter").descendant_elements("para");
     assert_eq!(path.to_string(), "child::chapter/descendant::para");
+    assert_eq!(path.to_abbr_string(), "chapter/descendant::para");
 }
 
 #[test]
@@ -92,6 +99,7 @@ fn test_spec_location_path_examples_13() {
     let mut path = LocationPath::default();
     path.all_child_elements().child_elements("para");
     assert_eq!(path.to_string(), "child::*/child::para");
+    assert_eq!(path.to_abbr_string(), "*/para");
 }
 
 #[test]
@@ -112,6 +120,7 @@ fn test_spec_location_path_examples_16() {
     let mut path = LocationPath::root();
     path.descendant_elements("olist").child_elements("item");
     assert_eq!(path.to_string(), "/descendant::olist/child::item");
+    assert_eq!(path.to_abbr_string(), "/descendant::olist/item");
 }
 
 #[test]
@@ -126,6 +135,7 @@ fn test_spec_location_path_examples_17() {
 
     path.append(step);
     assert_eq!(path.to_string(), "child::para[position() = 1]");
+    assert_eq!(path.to_abbr_string(), "para[1]");
 }
 
 #[test]
@@ -140,6 +150,7 @@ fn test_spec_location_path_examples_18() {
 
     path.append(step);
     assert_eq!(path.to_string(), "child::para[position() = last()]");
+    assert_eq!(path.to_abbr_string(), "para[position() = last()]");
 }
 
 #[test]
@@ -154,6 +165,7 @@ fn test_spec_location_path_examples_19() {
 
     path.append(step);
     assert_eq!(path.to_string(), "child::para[position() = last() - 1]");
+    assert_eq!(path.to_abbr_string(), "para[position() = last() - 1]");
 }
 
 #[test]
@@ -168,6 +180,7 @@ fn test_spec_location_path_examples_20() {
 
     path.append(step);
     assert_eq!(path.to_string(), "child::para[position() > 1]");
+    assert_eq!(path.to_abbr_string(), "para[position() > 1]");
 }
 
 #[test]
@@ -186,6 +199,7 @@ fn test_spec_location_path_examples_21() {
         path.to_string(),
         "following-sibling::chapter[position() = 1]"
     );
+    assert_eq!(path.to_abbr_string(), "following-sibling::chapter[1]");
 }
 
 #[test]
@@ -204,6 +218,7 @@ fn test_spec_location_path_examples_22() {
         path.to_string(),
         "preceding-sibling::chapter[position() = 1]"
     );
+    assert_eq!(path.to_abbr_string(), "preceding-sibling::chapter[1]");
 }
 
 #[test]
@@ -219,6 +234,7 @@ fn test_spec_location_path_examples_23() {
 
     path.append(step);
     assert_eq!(path.to_string(), "/descendant::figure[position() = 42]");
+    assert_eq!(path.to_abbr_string(), "/descendant::figure[42]");
 }
 
 #[test]
@@ -249,6 +265,7 @@ fn test_spec_location_path_examples_24() {
         path.to_string(),
         "/child::doc/child::chapter[position() = 5]/child::section[position() = 2]"
     );
+    assert_eq!(path.to_abbr_string(), "/doc/chapter[5]/section[2]");
 }
 
 #[test]
@@ -267,6 +284,7 @@ fn test_spec_location_path_examples_25() {
         path.to_string(),
         "/child::para[attribute::type = 'warning']"
     );
+    assert_eq!(path.to_abbr_string(), "/para[@type = 'warning']");
 }
 
 #[test]
@@ -289,6 +307,7 @@ fn test_spec_location_path_examples_26() {
         path.to_string(),
         "child::para[attribute::type = 'warning'][position() = 5]"
     );
+    assert_eq!(path.to_abbr_string(), "para[@type = 'warning'][5]");
 }
 
 #[test]
@@ -311,6 +330,7 @@ fn test_spec_location_path_examples_27() {
         path.to_string(),
         "child::para[position() = 5][attribute::type = 'warning']"
     );
+    assert_eq!(path.to_abbr_string(), "para[5][@type = 'warning']");
 }
 
 #[test]
@@ -329,6 +349,7 @@ fn test_spec_location_path_examples_28() {
         path.to_string(),
         "child::chapter[child::title = 'Introduction']"
     );
+    assert_eq!(path.to_abbr_string(), "chapter[title = 'Introduction']");
 }
 
 #[test]
@@ -341,6 +362,7 @@ fn test_spec_location_path_examples_29() {
 
     path.append(step);
     assert_eq!(path.to_string(), "child::chapter[child::title]");
+    assert_eq!(path.to_abbr_string(), "chapter[title]");
 }
 
 #[test]
@@ -359,6 +381,7 @@ fn test_spec_location_path_examples_30() {
         path.to_string(),
         "child::*[self::chapter or self::appendix]"
     );
+    assert_eq!(path.to_abbr_string(), "*[self::chapter or self::appendix]");
 }
 
 #[test]
@@ -380,5 +403,9 @@ fn test_spec_location_path_examples_31() {
     assert_eq!(
         path.to_string(),
         "child::*[self::chapter or self::appendix][position() = last()]"
+    );
+    assert_eq!(
+        path.to_abbr_string(),
+        "*[self::chapter or self::appendix][position() = last()]"
     );
 }
