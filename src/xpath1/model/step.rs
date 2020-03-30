@@ -34,7 +34,7 @@ macro_rules! step_fn {
     ($fn_name:ident, $axis:ident, $node_test:ident) => {
         pub fn $fn_name() -> Self {
             Self {
-                select: Select::new(AxisSpecifier::$axis, NodeTest::$node_test),
+                select: Select::$fn_name(),
                 predicates: Vec::default(),
             }
         }
@@ -42,7 +42,7 @@ macro_rules! step_fn {
     ($fn_name:ident, $axis:ident) => {
         pub fn $fn_name(named: &str) -> Self {
             Self {
-                select: Select::new(AxisSpecifier::$axis, NodeTest::Named(named.to_string())),
+                select: Select::$fn_name(named),
                 predicates: Vec::default(),
             }
         }
@@ -98,7 +98,14 @@ impl ToAbbrString for Step {
 // ------------------------------------------------------------------------------------------------
 
 impl Step {
-    pub fn new(axis: AxisSpecifier, node_test: NodeTest) -> Self {
+    pub fn new(select: Select) -> Self {
+        Self {
+            select,
+            predicates: Default::default(),
+        }
+    }
+
+    pub fn new_from(axis: AxisSpecifier, node_test: NodeTest) -> Self {
         Self {
             select: Select::new(axis, node_test),
             predicates: Default::default(),
