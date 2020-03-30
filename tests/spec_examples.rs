@@ -15,44 +15,74 @@ macro_rules! select {
 
 #[test]
 fn test_spec_location_path_examples_01() {
-    assert_eq!(Step::child_elements("para").to_string(), "child::para");
-    assert_eq!(Step::child_elements("para").to_abbr_string(), "para");
+    assert_eq!(
+        Step::new(Select::child_elements("para")).to_string(),
+        "child::para"
+    );
+    assert_eq!(
+        Step::new(Select::child_elements("para")).to_abbr_string(),
+        "para"
+    );
 }
 
 #[test]
 fn test_spec_location_path_examples_02() {
-    assert_eq!(Step::all_child_elements().to_string(), "child::*");
-    assert_eq!(Step::all_child_elements().to_abbr_string(), "*");
+    assert_eq!(
+        Step::new(Select::all_child_elements()).to_string(),
+        "child::*"
+    );
+    assert_eq!(
+        Step::new(Select::all_child_elements()).to_abbr_string(),
+        "*"
+    );
 }
 
 #[test]
 fn test_spec_location_path_examples_03() {
-    assert_eq!(Step::all_child_text().to_string(), "child::text()");
-    assert_eq!(Step::all_child_text().to_abbr_string(), "text()");
+    assert_eq!(
+        Step::new(Select::all_child_text()).to_string(),
+        "child::text()"
+    );
+    assert_eq!(
+        Step::new(Select::all_child_text()).to_abbr_string(),
+        "text()"
+    );
 }
 
 #[test]
 fn test_spec_location_path_examples_04() {
-    assert_eq!(Step::all_children().to_string(), "child::node()");
-    assert_eq!(Step::all_children().to_abbr_string(), "node()");
+    assert_eq!(
+        Step::new(Select::all_children()).to_string(),
+        "child::node()"
+    );
+    assert_eq!(Step::new(Select::all_children()).to_abbr_string(), "node()");
 }
 
 #[test]
 fn test_spec_location_path_examples_05() {
-    assert_eq!(Step::attributes("name").to_string(), "attribute::name");
-    assert_eq!(Step::attributes("name").to_abbr_string(), "@name");
+    assert_eq!(
+        Step::new(Select::attributes("name")).to_string(),
+        "attribute::name"
+    );
+    assert_eq!(
+        Step::new(Select::attributes("name")).to_abbr_string(),
+        "@name"
+    );
 }
 
 #[test]
 fn test_spec_location_path_examples_06() {
-    assert_eq!(Step::all_attributes().to_string(), "attribute::*");
-    assert_eq!(Step::all_attributes().to_abbr_string(), "@*");
+    assert_eq!(
+        Step::new(Select::all_attributes()).to_string(),
+        "attribute::*"
+    );
+    assert_eq!(Step::new(Select::all_attributes()).to_abbr_string(), "@*");
 }
 
 #[test]
 fn test_spec_location_path_examples_07() {
     assert_eq!(
-        Step::descendant_elements("para").to_string(),
+        Step::new(Select::descendant_elements("para")).to_string(),
         "descendant::para"
     );
 }
@@ -60,7 +90,7 @@ fn test_spec_location_path_examples_07() {
 #[test]
 fn test_spec_location_path_examples_08() {
     assert_eq!(
-        Step::new(AxisSpecifier::Ancestor, NodeTest::Named("div".to_string())).to_string(),
+        Step::new_from(AxisSpecifier::Ancestor, NodeTest::Named("div".to_string())).to_string(),
         "ancestor::div"
     );
 }
@@ -68,7 +98,7 @@ fn test_spec_location_path_examples_08() {
 #[test]
 fn test_spec_location_path_examples_09() {
     assert_eq!(
-        Step::ancestor_or_self_elements("div").to_string(),
+        Step::new(Select::ancestor_or_self_elements("div")).to_string(),
         "ancestor-or-self::div"
     );
 }
@@ -76,14 +106,17 @@ fn test_spec_location_path_examples_09() {
 #[test]
 fn test_spec_location_path_examples_10() {
     assert_eq!(
-        Step::descendant_or_self_elements("para").to_string(),
+        Step::new(Select::descendant_or_self_elements("para")).to_string(),
         "descendant-or-self::para"
     );
 }
 
 #[test]
 fn test_spec_location_path_examples_11() {
-    assert_eq!(Step::self_elements("para").to_string(), "self::para");
+    assert_eq!(
+        Step::new(Select::self_elements("para")).to_string(),
+        "self::para"
+    );
 }
 
 #[test]
