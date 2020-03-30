@@ -7,6 +7,7 @@ More detailed description, with
 
 */
 
+use crate::xpath1::model::function::is_function;
 use crate::xpath1::model::select::Select;
 use crate::xpath1::model::{AxisSpecifier, NodeTest, ToAbbrString};
 use std::borrow::Borrow;
@@ -167,16 +168,10 @@ impl Predicate {
         Predicate::Terminal(Terminal::Variable(named.to_string()))
     }
     pub fn function(named: &str) -> Self {
-        Predicate::Function(FunctionCall {
-            name: named.to_string(),
-            arguments: Vec::default(),
-        })
+        Predicate::Function(FunctionCall::new(named))
     }
     pub fn function_with(named: &str, args: &[Predicate]) -> Self {
-        Predicate::Function(FunctionCall {
-            name: named.to_string(),
-            arguments: args.to_vec(),
-        })
+        Predicate::Function(FunctionCall::new_with(named, args))
     }
     pub fn select(axis: AxisSpecifier, node_test: NodeTest) -> Self {
         Predicate::Terminal(Terminal::Select(Select::new(axis, node_test)))
@@ -333,6 +328,17 @@ impl ToAbbrString for FunctionCall {}
 // ------------------------------------------------------------------------------------------------
 
 impl FunctionCall {
+    pub fn new(name: &str) -> Self {
+        Self::new_with(name, &[])
+    }
+    pub fn new_with(name: &str, args: &[Predicate]) -> Self {
+        assert!(is_function(name));
+        // TODO: validate arg count
+        FunctionCall {
+            name: name.to_string(),
+            arguments: args.to_vec(),
+        }
+    }
     pub fn append(&mut self, argument: Predicate) {
         self.arguments.push(argument);
     }

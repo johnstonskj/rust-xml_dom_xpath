@@ -34,3 +34,5 @@ pub use step::Step;
 
 mod path;
 pub use path::LocationPath;
+
+mod function;
