@@ -9,7 +9,7 @@ clients to build these structures without having to parse text for common operat
 
 # Example
 
-```rust
+```rust,ignore
 pub use xml_dom::parser::read_xml;
 pub use xml_dom_xpath::xpath1::evaluate_path;
 
