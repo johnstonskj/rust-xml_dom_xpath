@@ -1,12 +1,3 @@
-/*!
-One-line description.
-
-More detailed description, with
-
-# Example
-
-*/
-
 use crate::xpath1::model::step::Step;
 use crate::xpath1::model::ToAbbrString;
 use std::fmt::{Display, Formatter, Result};
@@ -16,6 +7,14 @@ use std::slice::Iter;
 // Public Types
 // ------------------------------------------------------------------------------------------------
 
+///
+/// This models the entire path expression, comprising an ordered set of [`Step`](struct.Step.html)s.
+/// This also makes the distinction between an absolute and relative path with the `default()` and
+/// `with()` that create a relative path, `absolute` and `absolute_with` that create absolute paths.
+/// Additionally the `is_absolute()` function determines the type of a path.
+///
+/// Corresponds to the BNF production `LocationPath` (1).
+///
 #[derive(Clone, Debug)]
 pub struct LocationPath {
     root: bool,
@@ -32,12 +31,14 @@ pub struct LocationPath {
 
 macro_rules! path_fn {
     ($fn_name:ident) => {
+        /// Adds the corresponding `Step` to the end of this path.
         pub fn $fn_name(&mut self) -> &mut Self {
             self.append(Step::$fn_name());
             self
         }
     };
     ($fn_name:ident, named) => {
+        /// Adds the corresponding `Step` to the end of this path.
         pub fn $fn_name(&mut self, named: &str) -> &mut Self {
             self.append(Step::$fn_name(named));
             self
@@ -94,47 +95,61 @@ impl ToAbbrString for LocationPath {
 // ------------------------------------------------------------------------------------------------
 
 impl LocationPath {
-    pub fn new() -> Self {
-        Self {
-            root: false,
-            steps: Vec::default(),
-        }
-    }
-
-    pub fn new_with(step: Step) -> Self {
+    ///
+    /// Create a relative path with a single step.
+    ///
+    pub fn with(step: Step) -> Self {
         Self {
             root: false,
             steps: vec![step],
         }
     }
 
-    pub fn root() -> Self {
+    ///
+    /// Create an empty absolute path.
+    ///
+    pub fn absolute() -> Self {
         Self {
             root: true,
             steps: Vec::default(),
         }
     }
 
-    pub fn root_with(step: Step) -> Self {
+    ///
+    /// Create an absolute path with a single step.
+    ///
+    pub fn absolute_with(step: Step) -> Self {
         Self {
             root: true,
             steps: vec![step],
         }
     }
 
+    ///
+    /// Append `step` to the current path.
+    ///
     pub fn append(&mut self, step: Step) -> &mut Self {
         self.steps.push(step);
         self
     }
 
-    pub fn is_root(&self) -> bool {
+    ///
+    /// `true` if this is an absolute path, otherwise `false`.
+    ///
+    pub fn is_absolute(&self) -> bool {
         self.root
     }
 
+    ///
+    /// `true` if this path has no steps, otherwise `false`.
+    ///
     pub fn is_empty(&self) -> bool {
         self.steps.is_empty()
     }
 
+    ///
+    /// Return an iterator over the steps in this path.
+    ///
     pub fn steps(&self) -> Iter<Step> {
         self.steps.iter()
     }

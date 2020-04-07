@@ -16,11 +16,11 @@ macro_rules! select {
 #[test]
 fn test_spec_location_path_examples_01() {
     assert_eq!(
-        Step::new(Select::child_elements("para")).to_string(),
+        Step::with(Select::child_elements("para")).to_string(),
         "child::para"
     );
     assert_eq!(
-        Step::new(Select::child_elements("para")).to_abbr_string(),
+        Step::with(Select::child_elements("para")).to_abbr_string(),
         "para"
     );
 }
@@ -28,11 +28,11 @@ fn test_spec_location_path_examples_01() {
 #[test]
 fn test_spec_location_path_examples_02() {
     assert_eq!(
-        Step::new(Select::all_child_elements()).to_string(),
+        Step::with(Select::all_child_elements()).to_string(),
         "child::*"
     );
     assert_eq!(
-        Step::new(Select::all_child_elements()).to_abbr_string(),
+        Step::with(Select::all_child_elements()).to_abbr_string(),
         "*"
     );
 }
@@ -40,11 +40,11 @@ fn test_spec_location_path_examples_02() {
 #[test]
 fn test_spec_location_path_examples_03() {
     assert_eq!(
-        Step::new(Select::all_child_text()).to_string(),
+        Step::with(Select::all_child_text()).to_string(),
         "child::text()"
     );
     assert_eq!(
-        Step::new(Select::all_child_text()).to_abbr_string(),
+        Step::with(Select::all_child_text()).to_abbr_string(),
         "text()"
     );
 }
@@ -52,20 +52,23 @@ fn test_spec_location_path_examples_03() {
 #[test]
 fn test_spec_location_path_examples_04() {
     assert_eq!(
-        Step::new(Select::all_children()).to_string(),
+        Step::with(Select::all_children()).to_string(),
         "child::node()"
     );
-    assert_eq!(Step::new(Select::all_children()).to_abbr_string(), "node()");
+    assert_eq!(
+        Step::with(Select::all_children()).to_abbr_string(),
+        "node()"
+    );
 }
 
 #[test]
 fn test_spec_location_path_examples_05() {
     assert_eq!(
-        Step::new(Select::attributes("name")).to_string(),
+        Step::with(Select::attributes("name")).to_string(),
         "attribute::name"
     );
     assert_eq!(
-        Step::new(Select::attributes("name")).to_abbr_string(),
+        Step::with(Select::attributes("name")).to_abbr_string(),
         "@name"
     );
 }
@@ -73,16 +76,16 @@ fn test_spec_location_path_examples_05() {
 #[test]
 fn test_spec_location_path_examples_06() {
     assert_eq!(
-        Step::new(Select::all_attributes()).to_string(),
+        Step::with(Select::all_attributes()).to_string(),
         "attribute::*"
     );
-    assert_eq!(Step::new(Select::all_attributes()).to_abbr_string(), "@*");
+    assert_eq!(Step::with(Select::all_attributes()).to_abbr_string(), "@*");
 }
 
 #[test]
 fn test_spec_location_path_examples_07() {
     assert_eq!(
-        Step::new(Select::descendant_elements("para")).to_string(),
+        Step::with(Select::descendant_elements("para")).to_string(),
         "descendant::para"
     );
 }
@@ -90,7 +93,7 @@ fn test_spec_location_path_examples_07() {
 #[test]
 fn test_spec_location_path_examples_08() {
     assert_eq!(
-        Step::new_from(AxisSpecifier::Ancestor, NodeTest::Named("div".to_string())).to_string(),
+        Step::from(AxisSpecifier::Ancestor, NodeTest::Named("div".to_string())).to_string(),
         "ancestor::div"
     );
 }
@@ -98,7 +101,7 @@ fn test_spec_location_path_examples_08() {
 #[test]
 fn test_spec_location_path_examples_09() {
     assert_eq!(
-        Step::new(Select::ancestor_or_self_elements("div")).to_string(),
+        Step::with(Select::ancestor_or_self_elements("div")).to_string(),
         "ancestor-or-self::div"
     );
 }
@@ -106,7 +109,7 @@ fn test_spec_location_path_examples_09() {
 #[test]
 fn test_spec_location_path_examples_10() {
     assert_eq!(
-        Step::new(Select::descendant_or_self_elements("para")).to_string(),
+        Step::with(Select::descendant_or_self_elements("para")).to_string(),
         "descendant-or-self::para"
     );
 }
@@ -114,14 +117,14 @@ fn test_spec_location_path_examples_10() {
 #[test]
 fn test_spec_location_path_examples_11() {
     assert_eq!(
-        Step::new(Select::self_elements("para")).to_string(),
+        Step::with(Select::self_elements("para")).to_string(),
         "self::para"
     );
 }
 
 #[test]
 fn test_spec_location_path_examples_12() {
-    let mut path = LocationPath::new();
+    let mut path = LocationPath::default();
     path.child_elements("chapter").descendant_elements("para");
     assert_eq!(path.to_string(), "child::chapter/descendant::para");
     assert_eq!(path.to_abbr_string(), "chapter/descendant::para");
@@ -137,20 +140,20 @@ fn test_spec_location_path_examples_13() {
 
 #[test]
 fn test_spec_location_path_examples_14() {
-    let path = LocationPath::root();
+    let path = LocationPath::absolute();
     assert_eq!(path.to_string(), "/");
 }
 
 #[test]
 fn test_spec_location_path_examples_15() {
-    let mut path = LocationPath::root();
+    let mut path = LocationPath::absolute();
     path.descendant_elements("para");
     assert_eq!(path.to_string(), "/descendant::para");
 }
 
 #[test]
 fn test_spec_location_path_examples_16() {
-    let mut path = LocationPath::root();
+    let mut path = LocationPath::absolute();
     path.descendant_elements("olist").child_elements("item");
     assert_eq!(path.to_string(), "/descendant::olist/child::item");
     assert_eq!(path.to_abbr_string(), "/descendant::olist/item");
@@ -256,7 +259,7 @@ fn test_spec_location_path_examples_22() {
 
 #[test]
 fn test_spec_location_path_examples_23() {
-    let mut path = LocationPath::root();
+    let mut path = LocationPath::absolute();
 
     let mut step = Step::descendant_elements("figure");
 
@@ -272,7 +275,7 @@ fn test_spec_location_path_examples_23() {
 
 #[test]
 fn test_spec_location_path_examples_24() {
-    let mut path = LocationPath::root();
+    let mut path = LocationPath::absolute();
 
     path.append(Step::child_elements("doc"));
 
@@ -303,7 +306,7 @@ fn test_spec_location_path_examples_24() {
 
 #[test]
 fn test_spec_location_path_examples_25() {
-    let mut path = LocationPath::root();
+    let mut path = LocationPath::absolute();
 
     let mut step = Step::child_elements("para");
 

@@ -1,12 +1,3 @@
-/*!
-One-line description.
-
-More detailed description, with
-
-# Example
-
-*/
-
 use crate::xpath1::model::predicate::Predicate;
 use crate::xpath1::model::select::{AxisSpecifier, NodeTest, Select};
 use crate::xpath1::model::ToAbbrString;
@@ -17,6 +8,12 @@ use std::slice::Iter;
 // Public Types
 // ------------------------------------------------------------------------------------------------
 
+///
+/// This models a single step in an XPath expression; each step consists of a [`Select`](struct.Select.html)
+/// component and zero or more [`Predicate`](struct.Predicate.html)s.
+///
+/// Corresponds to the BNF production `Step` (4).
+///
 #[derive(Clone, Debug)]
 pub struct Step {
     select: Select,
@@ -33,6 +30,7 @@ pub struct Step {
 
 macro_rules! step_fn {
     ($fn_name:ident) => {
+        /// Create a new `Step` using the corresponding `Select` function.
         pub fn $fn_name() -> Self {
             Self {
                 select: Select::$fn_name(),
@@ -41,6 +39,7 @@ macro_rules! step_fn {
         }
     };
     ($fn_name:ident, named) => {
+        /// Create a new `Step` using the corresponding `Select` function.
         pub fn $fn_name(named: &str) -> Self {
             Self {
                 select: Select::$fn_name(named),
@@ -99,40 +98,44 @@ impl ToAbbrString for Step {
 // ------------------------------------------------------------------------------------------------
 
 impl Step {
-    pub fn new(select: Select) -> Self {
+    ///
+    /// Construct a new `Step` with the specified `Select` component.
+    ///
+    pub fn with(select: Select) -> Self {
         Self {
             select,
             predicates: Default::default(),
         }
     }
 
-    pub fn new_from(axis: AxisSpecifier, node_test: NodeTest) -> Self {
+    ///
+    /// Construct a new `Step`` with a new `Select` component` from `axis` and `node_test`.
+    ///
+    pub fn from(axis: AxisSpecifier, node_test: NodeTest) -> Self {
         Self {
-            select: Select::new(axis, node_test),
+            select: Select::with(axis, node_test),
             predicates: Default::default(),
         }
     }
 
-    pub fn new_with_predicate(
-        axis: AxisSpecifier,
-        node_test: NodeTest,
-        predicate: Predicate,
-    ) -> Self {
-        Self {
-            select: Select::new(axis, node_test),
-            predicates: vec![predicate],
-        }
-    }
-
+    ///
+    /// Append `predicate` to the list of `Predicate`s on this `Step`.
+    ///
     pub fn append(&mut self, predicate: Predicate) -> &mut Self {
         self.predicates.push(predicate);
         self
     }
 
+    ///
+    /// Return the `Select` component of this `Step`.
+    ///
     pub fn select_expr(&self) -> Select {
         self.select.clone()
     }
 
+    ///
+    /// Return an iterator over the `Predicate`s of this `Step`.
+    ///
     pub fn predicate_exprs(&self) -> Iter<Predicate> {
         self.predicates.iter()
     }

@@ -1,22 +1,11 @@
-/*!
-One-line description.
-
-More detailed description, with
-
-# Example
-
-*/
-
-// use ...
-
-// ------------------------------------------------------------------------------------------------
-// Public Types
-// ------------------------------------------------------------------------------------------------
-
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter, Result};
 use std::mem;
 use std::sync::Once;
+
+// ------------------------------------------------------------------------------------------------
+// Public Types
+// ------------------------------------------------------------------------------------------------
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum DataType {
@@ -108,7 +97,7 @@ impl Argument {
     //     Self::new_from(name, data_type, false)
     // }
 
-    pub(crate) fn new_from(name: &str, data_type: DataType, required: bool) -> Self {
+    pub(crate) fn with(name: &str, data_type: DataType, required: bool) -> Self {
         Self {
             name: name.to_string(),
             data_type,
@@ -139,14 +128,14 @@ impl Display for Function {
 // ------------------------------------------------------------------------------------------------
 
 impl Function {
-    pub fn new(name: &str, arguments: &[Argument], result_type: DataType) -> Self {
+    pub fn with(name: &str, arguments: &[Argument], result_type: DataType) -> Self {
         Self {
             name: name.to_string(),
             arguments: arguments.to_vec(),
             result_type,
         }
     }
-    pub(crate) fn new_from(
+    pub(crate) fn from_components(
         name: &str,
         arguments: &[(&str, DataType, bool)],
         result_type: DataType,
@@ -155,7 +144,7 @@ impl Function {
             name: name.to_string(),
             arguments: arguments
                 .iter()
-                .map(|(n, t, r)| Argument::new_from(n, t.clone(), *r))
+                .map(|(n, t, r)| Argument::with(n, t.clone(), *r))
                 .collect(),
             result_type,
         }
@@ -174,40 +163,40 @@ fn function_map() -> HashMap<String, Function> {
         INIT.call_once(|| {
             let all_functions = vec![
                 // 4.1 Node Set Functions
-                Function::new("last", &[], DataType::Number),
-                Function::new("position", &[], DataType::Number),
-                Function::new_from(
+                Function::with("last", &[], DataType::Number),
+                Function::with("position", &[], DataType::Number),
+                Function::from_components(
                     "count",
                     &[("node-set", DataType::NodeSet, true)],
                     DataType::Number,
                 ),
-                Function::new_from(
+                Function::from_components(
                     "id",
                     &[("object", DataType::Object, true)],
                     DataType::NodeSet,
                 ),
-                Function::new_from(
+                Function::from_components(
                     "local-name",
                     &[("node-set?", DataType::NodeSet, false)],
                     DataType::String,
                 ),
-                Function::new_from(
+                Function::from_components(
                     "namespace-uri",
                     &[("node-set?", DataType::NodeSet, false)],
                     DataType::String,
                 ),
-                Function::new_from(
+                Function::from_components(
                     "name",
                     &[("node-set?", DataType::NodeSet, false)],
                     DataType::String,
                 ),
                 // 4.2 String Functions
-                Function::new_from(
+                Function::from_components(
                     "string",
                     &[("object", DataType::Object, false)],
                     DataType::String,
                 ),
-                Function::new_from(
+                Function::from_components(
                     "concat",
                     &[
                         ("string-1", DataType::String, true),
@@ -215,7 +204,7 @@ fn function_map() -> HashMap<String, Function> {
                     ],
                     DataType::String,
                 ),
-                Function::new_from(
+                Function::from_components(
                     "starts-with",
                     &[
                         ("string", DataType::String, true),
@@ -223,7 +212,7 @@ fn function_map() -> HashMap<String, Function> {
                     ],
                     DataType::String,
                 ),
-                Function::new_from(
+                Function::from_components(
                     "contains",
                     &[
                         ("string", DataType::String, true),
@@ -231,7 +220,7 @@ fn function_map() -> HashMap<String, Function> {
                     ],
                     DataType::String,
                 ),
-                Function::new_from(
+                Function::from_components(
                     "substring-before",
                     &[
                         ("string", DataType::String, true),
@@ -239,7 +228,7 @@ fn function_map() -> HashMap<String, Function> {
                     ],
                     DataType::String,
                 ),
-                Function::new_from(
+                Function::from_components(
                     "substring-after",
                     &[
                         ("string", DataType::String, true),
@@ -247,7 +236,7 @@ fn function_map() -> HashMap<String, Function> {
                     ],
                     DataType::String,
                 ),
-                Function::new_from(
+                Function::from_components(
                     "substring",
                     &[
                         ("string", DataType::String, true),
@@ -256,17 +245,17 @@ fn function_map() -> HashMap<String, Function> {
                     ],
                     DataType::String,
                 ),
-                Function::new_from(
+                Function::from_components(
                     "string-length",
                     &[("string", DataType::String, false)],
                     DataType::String,
                 ),
-                Function::new_from(
+                Function::from_components(
                     "normalize-space",
                     &[("string", DataType::String, false)],
                     DataType::String,
                 ),
-                Function::new_from(
+                Function::from_components(
                     "translate",
                     &[
                         ("string", DataType::String, true),
@@ -276,41 +265,45 @@ fn function_map() -> HashMap<String, Function> {
                     DataType::String,
                 ),
                 // 4.3 Boolean Functions
-                Function::new_from(
+                Function::from_components(
                     "boolean",
                     &[("object", DataType::Object, true)],
                     DataType::Bool,
                 ),
-                Function::new_from("not", &[("value", DataType::Bool, true)], DataType::Bool),
-                Function::new_from("true", &[], DataType::Bool),
-                Function::new_from("false", &[], DataType::Bool),
-                Function::new_from(
+                Function::from_components(
+                    "not",
+                    &[("value", DataType::Bool, true)],
+                    DataType::Bool,
+                ),
+                Function::from_components("true", &[], DataType::Bool),
+                Function::from_components("false", &[], DataType::Bool),
+                Function::from_components(
                     "lang",
                     &[("string", DataType::String, true)],
                     DataType::Bool,
                 ),
                 // 4.4 Number Functions
-                Function::new_from(
+                Function::from_components(
                     "number",
                     &[("object", DataType::Object, true)],
                     DataType::Number,
                 ),
-                Function::new_from(
+                Function::from_components(
                     "sum",
                     &[("node-set", DataType::NodeSet, true)],
                     DataType::Number,
                 ),
-                Function::new_from(
+                Function::from_components(
                     "floor",
                     &[("number", DataType::Number, true)],
                     DataType::Number,
                 ),
-                Function::new_from(
+                Function::from_components(
                     "ceiling",
                     &[("number", DataType::Number, true)],
                     DataType::Number,
                 ),
-                Function::new_from(
+                Function::from_components(
                     "round",
                     &[("number", DataType::Number, true)],
                     DataType::Number,

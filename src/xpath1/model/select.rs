@@ -1,12 +1,3 @@
-/*!
-One-line description.
-
-More detailed description, with
-
-# Example
-
-*/
-
 use crate::xpath1::model::ToAbbrString;
 use std::fmt::{Display, Formatter, Result};
 
@@ -14,33 +5,79 @@ use std::fmt::{Display, Formatter, Result};
 // Public Types
 // ------------------------------------------------------------------------------------------------
 
+///
+/// This models the different axis specifiers described in XPath, the default is `Child`.
+///
+/// Corresponds to the BNF production `AxisSpecifier` (5).
+///
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum AxisSpecifier {
+    /// the `ancestor` axis contains the ancestors of the context node; the ancestors of the context
+    /// node consist of the parent of context node and the parent's parent and so on; thus, the
+    /// ancestor axis will always include the root node, unless the context node is the root node
     Ancestor,
+    /// the `ancestor-or-self` axis contains the context node and the ancestors of the context node;
+    /// thus, the ancestor axis will always include the root node
     AncestorOrSelf,
+    /// the `attribute` axis contains the attributes of the context node; the axis will be empty
+    /// unless the context node is an element
     Attribute,
+    /// the `child` axis contains the children of the context node
     Child,
+    /// the `descendant` axis contains the descendants of the context node; a descendant is a child
+    /// or a child of a child and so on; thus the descendant axis never contains attribute or
+    /// namespace nodes
     Descendant,
+    /// the `descendant-or-self` axis contains the context node and the descendants of the context
+    /// node
     DescendantOrSelf,
+    /// the `following` axis contains all nodes in the same document as the context node that are
+    /// after the context node in document order, excluding any descendants and excluding attribute
+    /// nodes and namespace nodes
     Following,
+    /// the `following-sibling` axis contains all the following siblings of the context node; if the
+    /// context node is an attribute node or namespace node, the `following-sibling` axis is empty
     FollowingSibling,
+    /// the `namespace` axis contains the namespace nodes of the context node; the axis will be
+    /// empty unless the context node is an element
     Namespace,
+    /// the `parent` axis contains the parent of the context node, if there is one
     Parent,
+    /// the `preceding` axis contains all nodes in the same document as the context node that are
+    /// before the context node in document order, excluding any ancestors and excluding attribute
+    /// nodes and namespace nodes
     Preceding,
+    /// the `preceding-sibling` axis contains all the preceding siblings of the context node; if the
+    /// context node is an attribute node or namespace node, the `preceding-sibling` axis is empty
     PrecedingSibling,
+    /// the `self` axis contains just the context node itself
     SelfNode,
 }
 
+///
+/// This models the different node tests described in XPath, the default is `All`.
+///
+/// Corresponds to the BNF production `NodeTest` (7).
+///
 #[derive(Clone, Debug, PartialEq)]
 pub enum NodeTest {
+    /// All Nodes of the principal type.
     All,
+    /// All Nodes of the principal type where `node_name` matches.
     Named(String),
+    /// All `Comment` nodes.
     Comment,
+    /// All `Text` nodes.
     Text,
+    /// All `ProcessingInstruction` nodes, optionally where `target` matches.
     ProcessingInstruction(Option<String>),
+    /// Nodes of any type.
     Node,
 }
 
+///
+/// A container for an `AxisSpecifier` and a `NodeTest`.
+///
 #[derive(Clone, Debug)]
 pub struct Select {
     axis: AxisSpecifier,
@@ -57,13 +94,15 @@ pub struct Select {
 
 macro_rules! select_fn {
     ($fn_name:ident, $axis:ident, $node_test:ident) => {
+        /// Create a new `Select` using the corresponding axis specifier and node test.
         pub fn $fn_name() -> Self {
-            Self::new(AxisSpecifier::$axis, NodeTest::$node_test)
+            Self::with(AxisSpecifier::$axis, NodeTest::$node_test)
         }
     };
     ($fn_name:ident, $axis:ident) => {
+        /// Create a new `Select` using the corresponding axis specifier and node test.
         pub fn $fn_name(named: &str) -> Self {
-            Self::new(AxisSpecifier::$axis, NodeTest::Named(named.to_string()))
+            Self::with(AxisSpecifier::$axis, NodeTest::Named(named.to_string()))
         }
     };
 }
@@ -216,17 +255,26 @@ impl ToAbbrString for Select {
 }
 
 impl Select {
-    pub fn new(axis: AxisSpecifier, node_test: NodeTest) -> Self {
+    ///
+    /// Construct a new `Select` component from the provided `axis` and `node_test`.
+    ///
+    pub fn with(axis: AxisSpecifier, node_test: NodeTest) -> Self {
         Self {
             axis,
             test: node_test,
         }
     }
 
+    ///
+    /// Return the axis specifier part of this Select component.
+    ///
     pub fn axis_specifier(&self) -> AxisSpecifier {
         self.axis
     }
 
+    ///
+    /// Return the node test part of this Select component.
+    ///
     pub fn node_test(&self) -> NodeTest {
         self.test.clone()
     }

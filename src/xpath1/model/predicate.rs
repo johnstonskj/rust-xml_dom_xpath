@@ -1,12 +1,3 @@
-/*!
-One-line description.
-
-More detailed description, with
-
-# Example
-
-*/
-
 use crate::xpath1::model::function::is_function;
 use crate::xpath1::model::select::Select;
 use crate::xpath1::model::{AxisSpecifier, NodeTest, ToAbbrString};
@@ -17,85 +8,125 @@ use std::fmt::{Display, Formatter, Result};
 // Public Types
 // ------------------------------------------------------------------------------------------------
 
+///
+/// This models the predicate component of a `Step`, each step having zero or more predicates.
+///
+/// Corresponds to the BNF production `Predicate` (8).
+///
 #[derive(Clone, Debug)]
 pub enum Predicate {
+    /// An expression
     Expr(ExprNode),
+    /// A terminal value
     Terminal(Terminal),
+    /// A function call.
     Function(FunctionCall),
 }
 
+///
+/// This models the set of binary (and one unary) expressions. Note that we use the parser to
+/// determine precedence so that the tree build using these nodes is precedence-unaware.
+///
+/// Corresponds to the BNF productions 14, 18-27.
+///
 #[derive(Clone, Debug)]
 pub enum ExprNode {
+    /// Predicate `"and"` Predicate
     And {
         left: Box<Predicate>,
         right: Box<Predicate>,
     },
+    /// Predicate `"or"` Predicate
     Or {
         left: Box<Predicate>,
         right: Box<Predicate>,
     },
+    /// Predicate `"="` Predicate
     Equals {
         left: Box<Predicate>,
         right: Box<Predicate>,
     },
+    /// Predicate `"!="` Predicate
     NotEquals {
         left: Box<Predicate>,
         right: Box<Predicate>,
     },
+    /// Predicate `"<"` Predicate
     LessThan {
         left: Box<Predicate>,
         right: Box<Predicate>,
     },
+    /// Predicate `"<="` Predicate
     LessThanOrEqual {
         left: Box<Predicate>,
         right: Box<Predicate>,
     },
+    /// Predicate `">"` Predicate
     GreaterThan {
         left: Box<Predicate>,
         right: Box<Predicate>,
     },
+    /// Predicate `">="` Predicate
     GreaterThanOrEqual {
         left: Box<Predicate>,
         right: Box<Predicate>,
     },
+    /// Predicate `"+"` Predicate
     Add {
         left: Box<Predicate>,
         right: Box<Predicate>,
     },
+    /// Predicate `"-"` Predicate
     Subtract {
         left: Box<Predicate>,
         right: Box<Predicate>,
     },
+    /// Predicate `"*"` Predicate
     Multiply {
         left: Box<Predicate>,
         right: Box<Predicate>,
     },
+    /// Predicate `"/"` Predicate
     Divide {
         left: Box<Predicate>,
         right: Box<Predicate>,
     },
+    /// Predicate `"mod"` Predicate
     Modulus {
         left: Box<Predicate>,
         right: Box<Predicate>,
     },
+    /// Predicate `"div"` Predicate
     FPDiv {
         left: Box<Predicate>,
         right: Box<Predicate>,
     },
-    UnaryMinus {
-        value: Box<Predicate>,
-    },
+    /// `"-"` Predicate
+    UnaryMinus { value: Box<Predicate> },
 }
 
+///
+/// This models a terminal value in the expression.
+///  
+/// Corresponds to the BNF production `PrimaryExpr` (15).
+///
 #[derive(Clone, Debug)]
 pub enum Terminal {
+    /// A variable reference
     Variable(String),
+    /// A String literal
     Literal(String),
-    Number(i64),
-    Float(f64),
+    /// A Number value, note that the specification makes these all floats
+    Number(f64),
+    /// A Select expression
     Select(Select),
 }
 
+///
+/// This models a call to one of the set of pre-defined functions.
+///
+/// Corresponds to the BNF production `FunctionCall` (16).
+///
 #[derive(Clone, Debug)]
 pub struct FunctionCall {
     name: String,
@@ -112,6 +143,7 @@ pub struct FunctionCall {
 
 macro_rules! predicate_fn {
     ($fn_name:ident, $expr_t:ident) => {
+        /// Construct the corresponding `Predicate` with the `left` and `right` values provided.
         pub fn $fn_name(left: Predicate, right: Predicate) -> Self {
             Predicate::Expr(ExprNode::$expr_t {
                 left: Box::new(left),
@@ -155,26 +187,34 @@ impl ToAbbrString for Predicate {
 // ------------------------------------------------------------------------------------------------
 
 impl Predicate {
+    /// Construct a new Predicate as simply a string literal value.
     pub fn literal(value: &str) -> Self {
         Predicate::Terminal(Terminal::Literal(value.to_string()))
     }
-    pub fn integer(value: i64) -> Self {
-        Predicate::Terminal(Terminal::Number(value))
-    }
-    pub fn float(value: f64) -> Self {
+
+    /// Construct a new Predicate as simply a number value.
+    pub fn number(value: f64) -> Self {
         Predicate::Terminal(Terminal::Float(value))
     }
+
+    /// Construct a new Predicate as simply a variable reference.
     pub fn variable(named: &str) -> Self {
         Predicate::Terminal(Terminal::Variable(named.to_string()))
     }
+
+    /// Construct a new Predicate as simply a function call (no arguments).
     pub fn function(named: &str) -> Self {
-        Predicate::Function(FunctionCall::new(named))
+        Predicate::Function(FunctionCall::with(named))
     }
+
+    /// Construct a new Predicate as simply a function call with arguments.
     pub fn function_with(named: &str, args: &[Predicate]) -> Self {
-        Predicate::Function(FunctionCall::new_with(named, args))
+        Predicate::Function(FunctionCall::with_both(named, args))
     }
+
+    /// Construct a new Predicate as simply a select expression.
     pub fn select(axis: AxisSpecifier, node_test: NodeTest) -> Self {
-        Predicate::Terminal(Terminal::Select(Select::new(axis, node_test)))
+        Predicate::Terminal(Terminal::Select(Select::with(axis, node_test)))
     }
 
     predicate_fn!(and, And);
@@ -192,6 +232,7 @@ impl Predicate {
     predicate_fn!(a_mod, Modulus);
     predicate_fn!(div, FPDiv);
 
+    /// Construct a unary minus predicate with the value provided.
     pub fn minus(value: Predicate) -> Self {
         Predicate::Expr(ExprNode::UnaryMinus {
             value: Box::new(value),
@@ -328,17 +369,22 @@ impl ToAbbrString for FunctionCall {}
 // ------------------------------------------------------------------------------------------------
 
 impl FunctionCall {
-    pub fn new(name: &str) -> Self {
-        Self::new_with(name, &[])
+    /// Construct a new function call to the function named `name`.
+    pub fn with(name: &str) -> Self {
+        Self::with_both(name, &[])
     }
-    pub fn new_with(name: &str, args: &[Predicate]) -> Self {
+
+    /// Construct a new function call to the function named `name` with the provided `arguments`.
+    pub fn with_both(name: &str, arguments: &[Predicate]) -> Self {
         assert!(is_function(name));
         // TODO: validate arg count
         FunctionCall {
             name: name.to_string(),
-            arguments: args.to_vec(),
+            arguments: arguments.to_vec(),
         }
     }
+
+    /// Append an argument to those made to this function.
     pub fn append(&mut self, argument: Predicate) {
         self.arguments.push(argument);
     }

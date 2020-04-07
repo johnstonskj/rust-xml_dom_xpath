@@ -12,6 +12,9 @@ over the [Document Object Model Core, Level 2](https://www.w3.org/TR/DOM-Level-2
 
 TBD
 
+This crate relies on the [`xml_dom`](https://crates.io/crates/xml_dom) crate for navigation of the DOM representation 
+of XML content. 
+
 ## Example
 
 ```rust
@@ -21,7 +24,7 @@ TBD
 
 **Version 0.1.0**
 
-* TBD
+* Initial upload, only very basic elements in any kind of working order.
 
 ## TODO
 

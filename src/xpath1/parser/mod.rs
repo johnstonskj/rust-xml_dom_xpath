@@ -1,5 +1,6 @@
 /*!
-Parse an XPath string into it's model form.
+Parse an XPath string into it's model form. The primary API is the [`read_str`](fn.read_str.html)
+function.
 
 # Specification
 
@@ -127,12 +128,13 @@ Parse an XPath string into it's model form.
 ```
 
 */
+
+use crate::xpath1::model::LocationPath;
+use std::fmt::{Display, Formatter};
+
 // ------------------------------------------------------------------------------------------------
 // Public Types
 // ------------------------------------------------------------------------------------------------
-
-
-use std::fmt::{Display, Formatter};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum ParseError {
@@ -146,6 +148,14 @@ pub enum ParseError {
 // ------------------------------------------------------------------------------------------------
 // Public Functions
 // ------------------------------------------------------------------------------------------------
+
+pub fn read_str(xpath_str: &str) -> Result<LocationPath, ParseError> {
+    use pest::Parser;
+    use pest_parser::{Rule, XPathParser};
+
+    let _result = XPathParser::parse(Rule::LocationPath, xpath_str);
+    unimplemented!()
+}
 
 // ------------------------------------------------------------------------------------------------
 // Implementations
@@ -195,4 +205,3 @@ impl<T> Into<Result<T, ParseError>> for ParseError {
 // ------------------------------------------------------------------------------------------------
 
 mod pest_parser;
-pub use pest_parser::read_str;

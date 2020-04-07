@@ -29,13 +29,18 @@ assert_eq!(path.to_abbr_string(), "following-sibling::chapter[1]");
 ```
 */
 
+use std::fmt::Display;
+
 // ------------------------------------------------------------------------------------------------
 // Public Types
 // ------------------------------------------------------------------------------------------------
 
-use std::fmt::Display;
-
+///
+/// Supports the display of paths and steps in their abbreviated form, as described in the XPath
+/// specification, §2.5, [Abbreviated Syntax](https://www.w3.org/TR/xpath-10/#path-abbrev).
+///
 pub trait ToAbbrString: Display {
+    /// Display in abbreviated form.
     fn to_abbr_string(&self) -> String {
         self.to_string()
     }

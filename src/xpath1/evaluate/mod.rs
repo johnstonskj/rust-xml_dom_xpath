@@ -1,30 +1,42 @@
 /*!
 This provides the evaluation implementation, it takes a `NodeSet` as the context and a parsed
-XPath `LocationPath`.
+XPath `LocationPath`. The primary API is the [`evaluate_path`](fn.evaluate_path.html) function.
 
 # Example
 
 */
 
 use crate::xpath1::model::{AxisSpecifier, LocationPath, Step};
+use crate::xpath1::XPathObject;
+use std::fmt::{Display, Formatter};
 use xml_dom::level2::NodeType;
 
 // ------------------------------------------------------------------------------------------------
 // Public Types
 // ------------------------------------------------------------------------------------------------
 
+///
+/// Potential errors returned by [`evaluate_path`](fn.evaluate_path.html).
+///
 #[derive(Clone, Debug, PartialEq)]
 pub enum EvaluationError {
-    NoDocumentNode,
-    InvalidDocumentNode,
+    /// A cycle was detected in the expression axis.
+    CycleError,
 }
 
 // ------------------------------------------------------------------------------------------------
 // Public Functions
 // ------------------------------------------------------------------------------------------------
 
-pub fn evaluate_path(node_set: &NodeSet, xpath: &LocationPath) -> NodeSet {
-    let mut next_set = if xpath.is_root() {
+///
+/// Given a [`NodeSet`](struct.NodeSet.html), evaluate the `xpath` expression and return an
+/// [`XPathObject`](../enum.XPathObject.html) result.
+///
+pub fn evaluate_path(
+    node_set: &NodeSet,
+    xpath: &LocationPath,
+) -> Result<XPathObject, EvaluationError> {
+    let mut next_set = if xpath.is_absolute() {
         node_set.document()
     } else {
         node_set.clone()
@@ -32,12 +44,28 @@ pub fn evaluate_path(node_set: &NodeSet, xpath: &LocationPath) -> NodeSet {
     for step in xpath.steps() {
         next_set = filter_nodes(&select_nodes(node_set, step), step)
     }
-    next_set
+    Ok(XPathObject::NodeSet(next_set))
 }
 
 // ------------------------------------------------------------------------------------------------
 // Implementations
 // ------------------------------------------------------------------------------------------------
+
+impl Display for EvaluationError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                EvaluationError::CycleError => "A cycle was detected in the expression axis.",
+            }
+        )
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+
+impl std::error::Error for EvaluationError {}
 
 // ------------------------------------------------------------------------------------------------
 // Private Functions
@@ -113,10 +141,22 @@ mod tests {
         document_node.clone()
     }
 
-    fn check_result_nodes(node_set: NodeSet, count: usize, node_type: NodeType) {
-        assert_eq!(node_set.len(), count);
-        assert!(node_set.iter().all(|node| node.node_type() == node_type));
-        println!("{:#?}", node_set);
+    fn check_result_nodes(
+        result: Result<XPathObject, EvaluationError>,
+        count: usize,
+        node_type: NodeType,
+    ) {
+        assert!(result.is_ok());
+        match result.unwrap() {
+            XPathObject::NodeSet(node_set) => {
+                assert_eq!(node_set.len(), count);
+                assert!(node_set.iter().all(|node| node.node_type() == node_type));
+                println!("{:#?}", node_set);
+            }
+            _ => {
+                panic!("Expecting a node set!");
+            }
+        }
     }
 
     // --------------------------------------------------------------------------------------------

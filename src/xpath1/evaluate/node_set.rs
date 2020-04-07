@@ -1,8 +1,7 @@
 /*!
 The type `NodeSet` represents both the input to, and output from, each step in a path.
 
-This is not truly a set, there may be duplicates and the order of items is defined by the individual
-axis functions, by default it is document order.
+
 
 */
 
@@ -16,7 +15,10 @@ use xml_dom::level2::{Node, NodeType, RefNode};
 // ------------------------------------------------------------------------------------------------
 
 ///
-/// A container of DOM nodes.
+/// A container of DOM nodes. This is not truly a set, there may be duplicates and the order of
+/// items is defined by the individual axis functions, by default it is document order. The name
+/// reflects the type introduced in the XPath 1.0 specification, §3.3
+/// [Node Sets](https://www.w3.org/TR/xpath-10/#node-sets).
 ///
 #[derive(Clone, Debug, PartialEq)]
 pub struct NodeSet(VecDeque<RefNode>);
