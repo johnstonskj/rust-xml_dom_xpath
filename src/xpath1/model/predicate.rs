@@ -194,7 +194,12 @@ impl Predicate {
 
     /// Construct a new Predicate as simply a number value.
     pub fn number(value: f64) -> Self {
-        Predicate::Terminal(Terminal::Float(value))
+        Predicate::Terminal(Terminal::Number(value))
+    }
+
+    /// Construct a new Predicate as simply a number value (casting from integer to float).
+    pub fn integer(value: i32) -> Self {
+        Predicate::Terminal(Terminal::Number(value as f64))
     }
 
     /// Construct a new Predicate as simply a variable reference.
@@ -333,7 +338,6 @@ impl Display for Terminal {
                 Terminal::Variable(v) => format!("${}", v),
                 Terminal::Literal(v) => format!("'{}'", v),
                 Terminal::Number(v) => format!("{}", v),
-                Terminal::Float(v) => format!("{}", v),
                 Terminal::Select(v) => format!("{}", v),
             }
         )
