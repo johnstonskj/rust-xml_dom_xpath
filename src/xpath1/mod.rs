@@ -1,133 +1,77 @@
 /*!
-XML Path Language (XPath), [Version 1.0](https://www.w3.org/TR/xpath-10/)
-
-# Specification
-
-```ebnf
-[1]  LocationPath          ::=  RelativeLocationPath
-                                | AbsoluteLocationPath
-[2]  AbsoluteLocationPath  ::=  '/' RelativeLocationPath?
-                                | AbbreviatedAbsoluteLocationPath
-[3]  RelativeLocationPath  ::=  Step
-                                | RelativeLocationPath '/' Step
-                                | AbbreviatedRelativeLocationPath
-
-[4]  Step                  :=   AxisSpecifier NodeTest Predicate*
-                                | AbbreviatedStep
-[5]  AxisSpecifier         ::=  AxisName '::'
-                                | AbbreviatedAxisSpecifier
-
-
-[6]  AxisName              ::=  'ancestor'
-                                | 'ancestor-or-self'
-                                | 'attribute'
-                                | 'child'
-                                | 'descendant'
-                                | 'descendant-or-self'
-                                | 'following'
-                                | 'following-sibling'
-                                | 'namespace'
-                                | 'parent'
-                                | 'preceding'
-                                | 'preceding-sibling'
-                                | 'self'
-
-
-[7]  NodeTest              ::=  NameTest
-                                | NodeType '(' ')'
-                                | 'processing-instruction' '(' Literal ')'
-
-
-[8]  Predicate             ::=  '[' PredicateExpr ']'
-[9]  PredicateExpr         ::=  Expr
-
-
-[10]  AbbreviatedAbsoluteLocationPath  ::=  '//' RelativeLocationPath
-[11]  AbbreviatedRelativeLocationPath  ::=  RelativeLocationPath '//' Step
-[12]  AbbreviatedStep                  ::=  '.'  |  '..'
-[13]  AbbreviatedAxisSpecifier         ::=  '@'?
-
-
-[14]  Expr                 ::=  OrExpr
-[15]  PrimaryExpr          ::=  VariableReference
-                                | '(' Expr ')'
-                                | Literal
-                                | Number
-                                | FunctionCall
-
-
-[16]  FunctionCall         ::=  FunctionName '(' ( Argument ( ',' Argument )* )? ')'
-[17]  Argument             ::=  Expr
-
-
-[18]  UnionExpr            ::=  PathExpr
-                                | UnionExpr '|' PathExpr
-[19]  PathExpr             ::=   LocationPath
-                                | FilterExpr
-                                | FilterExpr '/' RelativeLocationPath
-                                | FilterExpr '//' RelativeLocationPath
-[20]  FilterExpr           ::=  PrimaryExpr
-                                | FilterExpr Predicate
-
-
-[21]  OrExpr               ::=   AndExpr
-                                | OrExpr 'or' AndExpr
-[22]  AndExpr              ::=  EqualityExpr
-                                | AndExpr 'and' EqualityExpr
-[23]  EqualityExpr         ::=   RelationalExpr
-                                | EqualityExpr '=' RelationalExpr
-                                | EqualityExpr '!=' RelationalExpr
-[24]  RelationalExpr       ::=  AdditiveExpr
-                                | RelationalExpr '<' AdditiveExpr
-                                | RelationalExpr '>' AdditiveExpr
-                                | RelationalExpr '<=' AdditiveExpr
-                                | RelationalExpr '>=' AdditiveExpr
-
-
-[25]  AdditiveExpr         ::=  MultiplicativeExpr
-                                | AdditiveExpr '+' MultiplicativeExpr
-                                | AdditiveExpr '-' MultiplicativeExpr
-[26]  MultiplicativeExpr   ::=   UnaryExpr
-                                | MultiplicativeExpr MultiplyOperator UnaryExpr
-                                | MultiplicativeExpr 'div' UnaryExpr
-                                | MultiplicativeExpr 'mod' UnaryExpr
-[27]  UnaryExpr            ::=  UnionExpr
-                                | '-' UnaryExpr
-
-
-[28]  ExprToken            ::=  '(' | ')' | '[' | ']' | '.' | '..' | '@' | ',' | '::'
-                                | NameTest
-                                | NodeType
-                                | Operator
-                                | FunctionName
-                                | AxisName
-                                | Literal
-                                | Number
-                                | VariableReference
-[29]  Literal             ::=   '"' [^"]* '"'
-                                | "'" [^']* "'"
-[30]  Number              ::=   Digits ('.' Digits?)?
-                                | '.' Digits
-[31]  Digits              ::=   [0-9]+
-[32]  Operator            ::=   OperatorName
-                                | MultiplyOperator
-                                | '/' | '//' | '|' | '+' | '-' | '=' | '!=' | '<' | '<=' | '>' | '>='
-[33]  OperatorName        ::=   'and' | 'or' | 'mod' | 'div'
-[34]  MultiplyOperator    ::=   '*'
-[35]  FunctionName        ::=   QName - NodeType
-[36]  VariableReference   ::=   '$' QName
-[37]  NameTest            ::=   '*'
-                                | NCName ':' '*'
-                                | QName
-[38]  NodeType            ::=   'comment'
-                                | 'text'
-                                | 'processing-instruction'
-                                | 'node'
-[39]  ExprWhitespace      ::=   S
-```
-
+Implements the XML Path Language (XPath), [Version 1.0](https://www.w3.org/TR/xpath-10/).
 */
+
+use std::fmt::{Display, Formatter};
+use xml_dom::level2::RefNode;
+
+// ------------------------------------------------------------------------------------------------
+// Public Types
+// ------------------------------------------------------------------------------------------------
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum Error {
+    Parse(parse::ParseError),
+}
 
 pub const XPATH_VERSION: &str = "1.0";
 
+// ------------------------------------------------------------------------------------------------
+// Public Functions
+// ------------------------------------------------------------------------------------------------
+
+///
+/// Evaluate the XPath string against the set of nodes that act as context.
+///
+pub fn evaluate(xpath: &str, context_nodes: &[RefNode]) -> Result<Vec<RefNode>, Error> {
+    use crate::xpath1::evaluate::{evaluate_path, NodeSet};
+    use std::iter::FromIterator;
+
+    let xpath = parse::read_str(xpath);
+    let results = evaluate_path(&NodeSet::from_iter(context_nodes.iter().cloned()), &xpath);
+    Ok(Vec::from_iter(results.iter().cloned()))
+}
+
+// ------------------------------------------------------------------------------------------------
+// Implementations
+// ------------------------------------------------------------------------------------------------
+
+impl Display for Error {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Error::Parse(e) => e.to_string(),
+            }
+        )
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+
+impl std::error::Error for Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Error::Parse(err) => Some(err),
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private Types
+// ------------------------------------------------------------------------------------------------
+
+// ------------------------------------------------------------------------------------------------
+// Private Functions
+// ------------------------------------------------------------------------------------------------
+
+// ------------------------------------------------------------------------------------------------
+// Modules
+// ------------------------------------------------------------------------------------------------
+
+pub mod evaluate;
+
 pub mod model;
+
+pub mod parse;

@@ -10,6 +10,7 @@ More detailed description, with
 use crate::xpath1::model::step::Step;
 use crate::xpath1::model::ToAbbrString;
 use std::fmt::{Display, Formatter, Result};
+use std::slice::Iter;
 
 // ------------------------------------------------------------------------------------------------
 // Public Types
@@ -36,9 +37,9 @@ macro_rules! path_fn {
             self
         }
     };
-    ($fn_name:ident, $name_name:ident) => {
-        pub fn $fn_name(&mut self, $name_name: &str) -> &mut Self {
-            self.append(Step::$fn_name($name_name));
+    ($fn_name:ident, named) => {
+        pub fn $fn_name(&mut self, named: &str) -> &mut Self {
+            self.append(Step::$fn_name(named));
             self
         }
     };
@@ -121,6 +122,23 @@ impl LocationPath {
         }
     }
 
+    pub fn append(&mut self, step: Step) -> &mut Self {
+        self.steps.push(step);
+        self
+    }
+
+    pub fn is_root(&self) -> bool {
+        self.root
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.steps.is_empty()
+    }
+
+    pub fn steps(&self) -> Iter<Step> {
+        self.steps.iter()
+    }
+
     path_fn!(all_ancestors);
     path_fn!(all_ancestor_elements);
     path_fn!(all_ancestor_text);
@@ -190,9 +208,4 @@ impl LocationPath {
     path_fn!(all_self_elements);
     path_fn!(all_self_text);
     path_fn!(all_self_comments);
-
-    pub fn append(&mut self, step: Step) -> &mut Self {
-        self.steps.push(step);
-        self
-    }
 }

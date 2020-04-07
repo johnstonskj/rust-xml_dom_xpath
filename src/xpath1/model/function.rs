@@ -49,15 +49,122 @@ pub fn is_function(name: &str) -> bool {
     function_map().contains_key(name)
 }
 
+#[allow(dead_code)]
 pub fn get_function(name: &str) -> Option<Function> {
     let functions = function_map();
     functions.get(name).map(|f| f.clone())
 }
 
+#[allow(dead_code)]
 pub fn required_functions() -> Vec<Function> {
     let functions = function_map();
     functions.values().cloned().collect()
 }
+
+// ------------------------------------------------------------------------------------------------
+// Implementations
+// ------------------------------------------------------------------------------------------------
+
+impl Display for DataType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                DataType::Bool => "bool",
+                DataType::Number => "Num",
+                DataType::String => "&str",
+                DataType::Object => "Object",
+                DataType::NodeSet => "NodeSet",
+            }
+        )
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
+
+impl Display for Argument {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        write!(
+            f,
+            "{}: {}",
+            self.name,
+            if self.required {
+                self.data_type.to_string()
+            } else {
+                format!("Option<{}>", self.data_type)
+            }
+        )
+    }
+}
+
+impl Argument {
+    // pub fn new(name: &str, data_type: DataType) -> Self {
+    //     Self::new_from(name, data_type, true)
+    // }
+    //
+    // pub fn new_optional(name: &str, data_type: DataType) -> Self {
+    //     Self::new_from(name, data_type, false)
+    // }
+
+    pub(crate) fn new_from(name: &str, data_type: DataType, required: bool) -> Self {
+        Self {
+            name: name.to_string(),
+            data_type,
+            required,
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
+
+impl Display for Function {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        write!(
+            f,
+            "fn {}({}) -> {};",
+            self.name,
+            self.arguments
+                .iter()
+                .map(|a| a.to_string())
+                .collect::<Vec<String>>()
+                .join(", "),
+            self.result_type
+        )
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+
+impl Function {
+    pub fn new(name: &str, arguments: &[Argument], result_type: DataType) -> Self {
+        Self {
+            name: name.to_string(),
+            arguments: arguments.to_vec(),
+            result_type,
+        }
+    }
+    pub(crate) fn new_from(
+        name: &str,
+        arguments: &[(&str, DataType, bool)],
+        result_type: DataType,
+    ) -> Self {
+        Self {
+            name: name.to_string(),
+            arguments: arguments
+                .iter()
+                .map(|(n, t, r)| Argument::new_from(n, t.clone(), *r))
+                .collect(),
+            result_type,
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private Functions
+// ------------------------------------------------------------------------------------------------
 
 fn function_map() -> HashMap<String, Function> {
     static mut FUNCTIONS: *const HashMap<String, Function> = 0 as *const HashMap<String, Function>;
@@ -216,107 +323,6 @@ fn function_map() -> HashMap<String, Function> {
             FUNCTIONS = mem::transmute(Box::new(all_functions));
         });
         (*FUNCTIONS).clone()
-    }
-}
-
-// ------------------------------------------------------------------------------------------------
-// Implementations
-// ------------------------------------------------------------------------------------------------
-
-impl Display for DataType {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                DataType::Bool => "bool",
-                DataType::Number => "Num",
-                DataType::String => "&str",
-                DataType::Object => "Object",
-                DataType::NodeSet => "NodeSet",
-            }
-        )
-    }
-}
-
-// ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------
-
-impl Display for Argument {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(
-            f,
-            "{}: {}",
-            self.name,
-            if self.required {
-                self.data_type.to_string()
-            } else {
-                format!("Option<{}>", self.data_type)
-            }
-        )
-    }
-}
-
-impl Argument {
-    pub fn new(name: &str, data_type: DataType) -> Self {
-        Self::new_from(name, data_type, true)
-    }
-
-    pub fn new_optional(name: &str, data_type: DataType) -> Self {
-        Self::new_from(name, data_type, false)
-    }
-
-    pub(crate) fn new_from(name: &str, data_type: DataType, required: bool) -> Self {
-        Self {
-            name: name.to_string(),
-            data_type,
-            required,
-        }
-    }
-}
-
-// ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------
-
-impl Display for Function {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(
-            f,
-            "fn {}({}) -> {};",
-            self.name,
-            self.arguments
-                .iter()
-                .map(|a| a.to_string())
-                .collect::<Vec<String>>()
-                .join(", "),
-            self.result_type
-        )
-    }
-}
-
-// ------------------------------------------------------------------------------------------------
-
-impl Function {
-    pub fn new(name: &str, arguments: &[Argument], result_type: DataType) -> Self {
-        Self {
-            name: name.to_string(),
-            arguments: arguments.to_vec(),
-            result_type,
-        }
-    }
-    pub(crate) fn new_from(
-        name: &str,
-        arguments: &[(&str, DataType, bool)],
-        result_type: DataType,
-    ) -> Self {
-        Self {
-            name: name.to_string(),
-            arguments: arguments
-                .iter()
-                .map(|(n, t, r)| Argument::new_from(n, t.clone(), *r))
-                .collect(),
-            result_type,
-        }
     }
 }
 

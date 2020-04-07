@@ -44,7 +44,7 @@ pub enum NodeTest {
 #[derive(Clone, Debug)]
 pub struct Select {
     axis: AxisSpecifier,
-    node_test: NodeTest,
+    test: NodeTest,
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -186,7 +186,7 @@ impl Default for Select {
     fn default() -> Self {
         Self {
             axis: Default::default(),
-            node_test: Default::default(),
+            test: Default::default(),
         }
     }
 }
@@ -195,7 +195,7 @@ impl Default for Select {
 
 impl Display for Select {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f, "{}{}", self.axis, self.node_test,)
+        write!(f, "{}{}", self.axis, self.test,)
     }
 }
 
@@ -203,22 +203,34 @@ impl Display for Select {
 
 impl ToAbbrString for Select {
     fn to_abbr_string(&self) -> String {
-        if self.axis == AxisSpecifier::SelfNode && self.node_test == NodeTest::Node {
+        if self.axis == AxisSpecifier::SelfNode && self.test == NodeTest::Node {
             ".".to_string()
-        } else if self.axis == AxisSpecifier::Parent && self.node_test == NodeTest::Node {
+        } else if self.axis == AxisSpecifier::Parent && self.test == NodeTest::Node {
             "..".to_string()
-        } else if self.axis == AxisSpecifier::DescendantOrSelf && self.node_test == NodeTest::Node {
+        } else if self.axis == AxisSpecifier::DescendantOrSelf && self.test == NodeTest::Node {
             "//".to_string()
         } else {
-            format!("{}{}", self.axis.to_abbr_string(), self.node_test)
+            format!("{}{}", self.axis.to_abbr_string(), self.test)
         }
     }
 }
 
 impl Select {
     pub fn new(axis: AxisSpecifier, node_test: NodeTest) -> Self {
-        Self { axis, node_test }
+        Self {
+            axis,
+            test: node_test,
+        }
     }
+
+    pub fn axis_specifier(&self) -> AxisSpecifier {
+        self.axis
+    }
+
+    pub fn node_test(&self) -> NodeTest {
+        self.test.clone()
+    }
+
     select_fn!(all_ancestors, Ancestor, Node);
     select_fn!(all_ancestor_elements, Ancestor, All);
     select_fn!(all_ancestor_text, Ancestor, Text);

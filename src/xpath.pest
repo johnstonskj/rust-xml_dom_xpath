@@ -1,0 +1,279 @@
+
+// [1]  LocationPath          ::=  RelativeLocationPath
+//                                 | AbsoluteLocationPath
+
+LocationPath = { RelativeLocationPath | AbsoluteLocationPath }
+
+// [2]  AbsoluteLocationPath  ::=  "/" RelativeLocationPath?
+//                                 | AbbreviatedAbsoluteLocationPath
+
+AbsoluteLocationPath = { "/" ~ RelativeLocationPath? | AbbreviatedAbsoluteLocationPath }
+
+// [3]  RelativeLocationPath  ::=  Step
+//                                 | RelativeLocationPath "/" Step
+//                                 | AbbreviatedRelativeLocationPath
+
+RelativeLocationPath = { Step ~ ("/" ~ Step)* }
+
+// [4]  Step                  :=   AxisSpecifier NodeTest Predicate*
+//                                 | AbbreviatedStep
+
+Step = { AxisSpecifier ~ NodeTest ~ Predicate* | AbbreviatedStep }
+
+// [5]  AxisSpecifier         ::=  AxisName "::"
+//                                 | AbbreviatedAxisSpecifier
+
+AxisSpecifier = { AxisName ~ "::" | AbbreviatedAxisSpecifier }
+
+// [6]  AxisName              ::=  "ancestor"
+//                                 | "ancestor-or-self"
+//                                 | "attribute"
+//                                 | "child"
+//                                 | "descendant"
+//                                 | "descendant-or-self"
+//                                 | "following"
+//                                 | "following-sibling"
+//                                 | "namespace"
+//                                 | "parent"
+//                                 | "preceding"
+//                                 | "preceding-sibling"
+//                                 | "self"
+
+AxisName = { "ancestor" | "ancestor-or-self" | "attribute" | "child" | "descendant" | "descendant-or-self"
+           | "following" | "following-sibling" | "namespace" | "parent" | "preceding" | "preceding-sibling"
+           | "self" }
+
+// [7]  NodeTest              ::=  NameTest
+//                                 | NodeType "(" ")"
+//                                 | "processing-instruction" "(" Literal ")"
+
+NodeTest = { NameTest | NodeType ~ "(" ~ ")" | "processing-instruction" ~ "(" ~ Literal ~ ")" }
+
+// [8]  Predicate             ::=  "[" PredicateExpr "]"
+
+Predicate = { "[" ~ PredicateExpr ~ "]" }
+
+// [9]  PredicateExpr         ::=  Expr
+
+PredicateExpr = { Expr }
+
+// [10]  AbbreviatedAbsoluteLocationPath  ::=  "//" RelativeLocationPath
+
+AbbreviatedAbsoluteLocationPath = { "//" ~ RelativeLocationPath }
+
+// [11]  AbbreviatedRelativeLocationPath  ::=  RelativeLocationPath "//" Step
+
+AbbreviatedRelativeLocationPath =  { RelativeLocationPath ~ "//" ~ Step }
+
+// [12]  AbbreviatedStep                  ::=  "."  |  ".."
+
+AbbreviatedStep = { "."  |  ".." }
+
+// [13]  AbbreviatedAxisSpecifier         ::=  "@"?
+
+AbbreviatedAxisSpecifier = { "@"? }
+
+// [14]  Expr                 ::=  OrExpr
+
+Expr  = { UnaryExpr | BinaryExpr }
+
+// [15]  PrimaryExpr          ::=  VariableReference
+//                                 | "(" Expr ")"
+//                                 | Literal
+//                                 | Number
+//                                 | FunctionCall
+
+PrimaryExpr = { VariableReference | "(" ~ Expr ~ ")" | Literal | Number | FunctionCall }
+
+// [16]  FunctionCall         ::=  FunctionName "(" ( Argument ( "," Argument )* )? ")"
+
+FunctionCall = { FunctionName ~ "(" ~ ( Argument ~ ( "," ~ Argument )* )? ~ ")" }
+
+// [17]  Argument             ::=  Expr
+
+Argument = { Expr }
+
+// [18]  UnionExpr            ::=  PathExpr
+//                                 | UnionExpr "|" PathExpr
+
+UnionExpr = { PathExpr ~ ( "|" ~ PathExpr)? }
+
+// [19]  PathExpr             ::=   LocationPath
+//                                 | FilterExpr
+//                                 | FilterExpr "/" RelativeLocationPath
+//                                 | FilterExpr "//" RelativeLocationPath
+
+PathExpr = { LocationPath | FilterExpr | FilterExpr ~ "/" ~ RelativeLocationPath | FilterExpr ~ "//" ~ RelativeLocationPath }
+
+// [20]  FilterExpr           ::=  PrimaryExpr
+//                                 | FilterExpr Predicate
+
+FilterExpr = { PrimaryExpr ~ Predicate? }
+
+// [21]  OrExpr               ::=   AndExpr
+//                                 | OrExpr "or" AndExpr
+// [22]  AndExpr              ::=  EqualityExpr
+//                                 | AndExpr "and" EqualityExpr
+// [23]  EqualityExpr         ::=   RelationalExpr
+//                                 | EqualityExpr "=" RelationalExpr
+//                                 | EqualityExpr "!=" RelationalExpr
+// [24]  RelationalExpr       ::=  AdditiveExpr
+//                                 | RelationalExpr "<" AdditiveExpr
+//                                 | RelationalExpr ">" AdditiveExpr
+//                                 | RelationalExpr "<=" AdditiveExpr
+//                                 | RelationalExpr ">=" AdditiveExpr
+// [25]  AdditiveExpr         ::=  MultiplicativeExpr
+//                                 | AdditiveExpr "+" MultiplicativeExpr
+//                                 | AdditiveExpr "-" MultiplicativeExpr
+// [26]  MultiplicativeExpr   ::=   UnaryExpr
+//                                 | MultiplicativeExpr MultiplyOperator UnaryExpr
+//                                 | MultiplicativeExpr "div" UnaryExpr
+//                                 | MultiplicativeExpr "mod" UnaryExpr
+// [27]  UnaryExpr            ::=  UnionExpr
+//                                 | "-" UnaryExpr
+
+UnaryExpr = { "-" ~ Expr }
+
+BinaryExpr = { PrimaryExpr ~ Operator ~ Expr }
+
+// [28]  ExprToken            ::=  "(" | ")" | "[" | "]" | "." | ".." | "@" | "," | "::"
+//                                 | NameTest
+//                                 | NodeType
+//                                 | Operator
+//                                 | FunctionName
+//                                 | AxisName
+//                                 | Literal
+//                                 | Number
+//                                 | VariableReference
+
+ExprToken = { "(" | ")" | "[" | "]" | "." | ".." | "@" | "," | "::"
+            | NameTest | NodeType | Operator | FunctionName | AxisName | Literal | Number | VariableReference }
+
+// [29]  Literal             ::=   """ [^"]* """
+//                                 | """ [^"]* """
+
+Literal = ${ "\"" ~ not_dquote* ~ "\"" }
+
+not_dquote = @{ !("\"") ~ ANY }
+
+// [30]  Number              ::=   Digits ("." Digits?)?
+//                                 | "." Digits
+
+Number = @{ ASCII_DIGIT ~ ("." ~ ASCII_DIGIT?)? | "." ~ ASCII_DIGIT }
+
+// [31]  Digits              ::=   [0-9]+
+
+// [32]  Operator            ::=   OperatorName
+//                                 | MultiplyOperator
+//                                 | "/" | "//" | "|" | "+" | "-" | "=" | "!=" | "<" | "<=" | ">" | ">="
+// [33]  OperatorName        ::=   "and" | "or" | "mod" | "div"
+// [34]  MultiplyOperator    ::=   "*"
+
+Operator = { and | or | modulus | div | multiply
+           | descendant | descendant_or_self | union
+           | add | subtract | eq | neq | lt | lteq | gt | gteq }
+
+and = { "and" }
+
+or = { "or" }
+
+modulus = { "mod" }
+
+div = { "div" }
+
+descendant = { "/" }
+
+descendant_or_self = { "//" }
+
+union = { "|" }
+
+add = { "+" }
+
+subtract = { "-" }
+
+multiply = { "*" }
+
+eq = { "=" }
+
+neq = { "!=" }
+
+lt = { "<" }
+
+lteq = { "<=" }
+
+gt = { ">" }
+
+gteq = { ">=" }
+
+// [35]  FunctionName        ::=   QName - NodeType
+
+FunctionName = { QName }
+
+// [36]  VariableReference   ::=   "$" QName
+
+VariableReference = { "$" ~ QName }
+
+// [37]  NameTest            ::=   "*"
+//                                 | NCName ":" "*"
+//                                 | QName
+
+NameTest = { "*" | NCName ~ ":" ~ "*" | QName }
+
+// [38]  NodeType            ::=   "comment"
+//                                 | "text"
+//                                 | "processing-instruction"
+//                                 | "node"
+
+NodeType = { "comment" | "text" | "processing-instruction" | "node"}
+
+// [39]  ExprWhitespace      ::=   S
+
+WHITESPACE = _{ " " | "\t" }
+
+// *** From https://www.w3.org/TR/REC-xml-names ***
+
+// [4]       NCName          ::=   Name - (Char* ':' Char*)    /* An XML Name, minus the ":" */
+
+NCName = { Name }
+
+// [7]       QName           ::=   PrefixedName
+//                                 | UnprefixedName
+
+QName = { PrefixedName | UnprefixedName }
+
+// 8]       PrefixedName     ::=   Prefix ':' LocalPart
+
+PrefixedName = { Prefix ~ ":" ~ LocalPart }
+
+// [9]       UnprefixedName  ::=   LocalPart
+
+UnprefixedName = { LocalPart }
+
+// [10]       Prefix         ::=   NCName
+
+Prefix = _{ NCName }
+
+// [11]       LocalPart      ::=   NCName
+
+LocalPart = _{ NCName }
+
+// *** https://www.w3.org/TR/xml11/ ***
+
+
+// [4]        NameStartChar  ::=   ":" | [A-Z] | "_" | [a-z] | [#xC0-#xD6] | [#xD8-#xF6] | [#xF8-#x2FF]
+//                                 | [#x370-#x37D] | [#x37F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F]
+//                                 | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD]
+//                                 | [#x10000-#xEFFFF]
+
+NameStartChar = _{ ASCII_ALPHA | "_" | '\u{C0}'..'\u{D6}' | '\u{D8}'..'\u{F6}' | '\u{0F8}'..'\u{2FF}'
+                                    | '\u{370}'..'\u{37D}' | '\u{037F}'..'\u{1FFF}' | '\u{200C}'..'\u{200D}' | '\u{2070}'..'\u{218F}'
+                                    | '\u{2C00}'..'\u{2FEF}' | '\u{3001}'..'\u{D76FF}' | '\u{F900}'..'\u{FDCF}' | '\u{FDF0}'..'\u{FFFD}'
+                                    | '\u{10000}'..'\u{EFFFF}' }
+
+// [4a]       NameChar       ::=   NameStartChar | "-" | "." | [0-9] | #xB7 | [#x0300-#x036F] | [#x203F-#x2040]
+
+NameChar = _{ NameStartChar | "-" | "." | ASCII_DIGIT | '\u{B7}'..'\u{B7}' | '\u{0300}'..'\u{036F}' | '\u{203F}'..'\u{2040}' }
+
+// [5]        Name           ::=   NameStartChar (NameChar)*
+
+Name = { NameStartChar ~ NameChar* }
