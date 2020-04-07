@@ -3,11 +3,15 @@ name = "xml_dom_xpath"
 version = "0.1.0"
 authors = ["Simon Johnston <johnstonskj@gmail.com>"]
 edition = "2018"
-
+description = "Provides an implementation of W3C XPath 1.0 over the Document Object Model"
+documentation = "https://docs.rs/xml_dom_xpath/"
+repository = "https://github.com/johnstonskj/rust-xml_dom_xpath.git"
+license = "MIT"
+readme = "README.md"
+publish = true
 
 [dependencies]
-#xml_dom = "0.2.1"
-xml_dom = { version="0.2", path="../xml_dom" }
+xml_dom = "0.2.2"
 lazy_static = "1.4.0"
 pest = "2.0"
 pest_derive = "2.0"
