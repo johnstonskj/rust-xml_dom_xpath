@@ -7,8 +7,19 @@ description = "Provides an implementation of W3C XPath 1.0 over the Document Obj
 documentation = "https://docs.rs/xml_dom_xpath/"
 repository = "https://github.com/johnstonskj/rust-xml_dom_xpath.git"
 license = "MIT"
+license-file = "LICENSE"
 readme = "README.md"
 publish = true
+default-run = "xpath"
+
+[[bin]]
+name = "xpath"
+path = "src/bin/main.rs"
+required-features = ["command_line"]
+
+[features]
+default = []
+command_line = []
 
 [dependencies]
 xml_dom = "0.2.2"

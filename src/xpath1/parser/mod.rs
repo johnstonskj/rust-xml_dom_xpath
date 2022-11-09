@@ -130,6 +130,9 @@ function.
 */
 
 use crate::xpath1::model::LocationPath;
+use pest::error::Error;
+use pest::Parser;
+use pest_parser::{Rule, XPathParser};
 use std::fmt::{Display, Formatter};
 
 // ------------------------------------------------------------------------------------------------
@@ -138,11 +141,8 @@ use std::fmt::{Display, Formatter};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum ParseError {
-    EmptyPath,
-    EmptyStep,
-    InvalidCharacter(char),
-    InvalidAxisSpecifier(String),
-    InvalidNodeTest(String),
+    EmptyString,
+    Parser(Error<Rule>),
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -150,11 +150,14 @@ pub enum ParseError {
 // ------------------------------------------------------------------------------------------------
 
 pub fn read_str(xpath_str: &str) -> Result<LocationPath, ParseError> {
-    use pest::Parser;
-    use pest_parser::{Rule, XPathParser};
+    if xpath_str.is_empty() {
+        return Err(ParseError::EmptyString);
+    }
+    let _path = XPathParser::parse(Rule::LocationPath, xpath_str)?
+        .next()
+        .unwrap();
 
-    let _result = XPathParser::parse(Rule::LocationPath, xpath_str);
-    unimplemented!()
+    Err(ParseError::EmptyString)
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -167,14 +170,8 @@ impl Display for ParseError {
             f,
             "{}",
             match self {
-                ParseError::EmptyPath => "The path string is empty".to_string(),
-                ParseError::EmptyStep => "The step string is empty".to_string(),
-                ParseError::InvalidCharacter(c) =>
-                    format!("An invalid character was found. Character '{}'", c),
-                ParseError::InvalidAxisSpecifier(s) =>
-                    format!("An invalid axis specifier was found. Axis '{}'", s),
-                ParseError::InvalidNodeTest(s) =>
-                    format!("An invalid node test was found. Axis '{}'", s),
+                ParseError::EmptyString => "The path string is empty".to_string(),
+                ParseError::Parser(err) => format!("The parser failed. {:?}", err),
             }
         )
     }
@@ -186,9 +183,9 @@ impl std::error::Error for ParseError {}
 
 // ------------------------------------------------------------------------------------------------
 
-impl<T> Into<Result<T, ParseError>> for ParseError {
-    fn into(self) -> Result<T, ParseError> {
-        Err(self)
+impl From<Error<Rule>> for ParseError {
+    fn from(err: Error<Rule>) -> Self {
+        Self::Parser(err)
     }
 }
 

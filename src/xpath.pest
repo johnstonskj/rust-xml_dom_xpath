@@ -2,12 +2,13 @@
 // [1]  LocationPath          ::=  RelativeLocationPath
 //                                 | AbsoluteLocationPath
 
-LocationPath = { RelativeLocationPath | AbsoluteLocationPath }
+//LocationPath = { SOI ~ (RelativeLocationPath | AbsoluteLocationPath) ~ EOI }
+LocationPath = { SOI ~ (RelativeLocationPath | AbsoluteLocationPath) ~ EOI }
 
 // [2]  AbsoluteLocationPath  ::=  "/" RelativeLocationPath?
 //                                 | AbbreviatedAbsoluteLocationPath
 
-AbsoluteLocationPath = { "/" ~ RelativeLocationPath? | AbbreviatedAbsoluteLocationPath }
+AbsoluteLocationPath = { ("/" ~ RelativeLocationPath?) | AbbreviatedAbsoluteLocationPath }
 
 // [3]  RelativeLocationPath  ::=  Step
 //                                 | RelativeLocationPath "/" Step
@@ -39,23 +40,20 @@ AxisSpecifier = { AxisName ~ "::" | AbbreviatedAxisSpecifier }
 //                                 | "preceding-sibling"
 //                                 | "self"
 
-AxisName = { "ancestor" | "ancestor-or-self" | "attribute" | "child" | "descendant" | "descendant-or-self"
-           | "following" | "following-sibling" | "namespace" | "parent" | "preceding" | "preceding-sibling"
+AxisName = { "ancestor-or-self" | "ancestor" | "attribute" | "child" | "descendant-or-self" | "descendant"
+           | "following-sibling" | "following" | "namespace" | "parent" | "preceding-sibling" | "preceding"
            | "self" }
 
 // [7]  NodeTest              ::=  NameTest
 //                                 | NodeType "(" ")"
 //                                 | "processing-instruction" "(" Literal ")"
 
-NodeTest = { NameTest | NodeType ~ "(" ~ ")" | "processing-instruction" ~ "(" ~ Literal ~ ")" }
+NodeTest = { (NodeType ~ "(" ~ ")") | ("processing-instruction" ~ "(" ~ Literal ~ ")") | NameTest }
 
 // [8]  Predicate             ::=  "[" PredicateExpr "]"
-
-Predicate = { "[" ~ PredicateExpr ~ "]" }
-
 // [9]  PredicateExpr         ::=  Expr
 
-PredicateExpr = { Expr }
+Predicate = { "[" ~ Expr ~ "]" }
 
 // [10]  AbbreviatedAbsoluteLocationPath  ::=  "//" RelativeLocationPath
 
@@ -134,7 +132,7 @@ FilterExpr = { PrimaryExpr ~ Predicate? }
 
 UnaryExpr = { "-" ~ Expr }
 
-BinaryExpr = { PrimaryExpr ~ Operator ~ Expr }
+BinaryExpr = { PrimaryExpr ~ Operator ~ PrimaryExpr }
 
 // [28]  ExprToken            ::=  "(" | ")" | "[" | "]" | "." | ".." | "@" | "," | "::"
 //                                 | NameTest
@@ -145,9 +143,6 @@ BinaryExpr = { PrimaryExpr ~ Operator ~ Expr }
 //                                 | Literal
 //                                 | Number
 //                                 | VariableReference
-
-ExprToken = { "(" | ")" | "[" | "]" | "." | ".." | "@" | "," | "::"
-            | NameTest | NodeType | Operator | FunctionName | AxisName | Literal | Number | VariableReference }
 
 // [29]  Literal             ::=   """ [^"]* """
 //                                 | """ [^"]* """
